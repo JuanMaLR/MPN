@@ -7,6 +7,7 @@ class NeuronLayer():
 
 
 class NeuralNetwork():
+    #Layer 2 is defined as the output layer, while layer 1 is the hidden layer
     def __init__(self, layer1, layer2):
         self.layer1 = layer1
         self.layer2 = layer2
@@ -32,15 +33,23 @@ class NeuralNetwork():
 
             # Calculate the error for layer 2 (The difference between the desired output
             # and the predicted output).
+            #Get the error of the obtained outputs and the desired output
             layer2_error = training_set_outputs - output_from_layer_2
+            #if(layer2_error < 0.3): For exiting if the error drops certain value
+            #    return
+            #Get the delta (contribution of error from the outputs to the inputs) by multiplying the error from
+            #the output times the sigmoid of the output layer
             layer2_delta = layer2_error * self.__sigmoid_derivative(output_from_layer_2)
 
             # Calculate the error for layer 1 (By looking at the weights in layer 1,
             # we can determine by how much layer 1 contributed to the error in layer 2).
+            #Get the error from the outputs of the hidden layer
             layer1_error = layer2_delta.dot(self.layer2.synaptic_weights.T)
+            #Get the contribution of errors from the outputs of the input layer 
             layer1_delta = layer1_error * self.__sigmoid_derivative(output_from_layer_1)
 
-            # Calculate how much to adjust the weights by
+            # Calculate how much to adjust the weights by.
+            #Get the adjustment required for the next iteration of each layer
             layer1_adjustment = training_set_inputs.T.dot(layer1_delta)
             layer2_adjustment = output_from_layer_1.T.dot(layer2_delta)
 
@@ -50,13 +59,16 @@ class NeuralNetwork():
 
     # The neural network thinks.
     def think(self, inputs):
+        #Multiply input times random weights
         output_from_layer1 = self.__sigmoid(dot(inputs, self.layer1.synaptic_weights))
+        #Multiply hidden layer output times the random weights
         output_from_layer2 = self.__sigmoid(dot(output_from_layer1, self.layer2.synaptic_weights))
+        #Return the outputs from the multiplication of the inputs times the weights
         return output_from_layer1, output_from_layer2
 
     # The neural network prints its weights
     def print_weights(self):
-        print ("    Layer 1 (181 neurons, each with 5 inputs): ")
+        print ("    Layer 1 (181 neurons, each with 181 inputs): ")
         print (self.layer1.synaptic_weights)
         print ("    Layer 2 (30 neuron, with 181 inputs):")
         print (self.layer2.synaptic_weights)
@@ -260,17 +272,16 @@ if __name__ == "__main__":
                                   [0.083333333, 0          , 0.05, 0          , 0          , 0, 0.470588235, 0          , 0          , 0    , 0          , 0  , 0          , 0.222222222, 0, 0          , 0.075471698, 0.222222222, 0.095238095, 0          , 0   , 0          , 0  , 0          , 0          , 0          , 1   , 0, 0          , 1], #OCD
                                   [0          , 0          , 0   , 0.076923077, 0          , 0, 0          , 0          , 0          , 0    , 0          , 0  , 0.023622047, 0          , 0, 0          , 0          , 0          , 0          , 0          , 0   , 0          , 0  , 0          , 0.069767442, 0          , 0   , 1, 0          , 0], #Peritonitis
                                   [0          , 0          , 0.15, 0          , 0          , 0, 0          , 0.041666667, 0          , 0    , 0.088235294, 0  , 0          , 0          , 0, 0          , 0          , 0          , 0.047619048, 0.054545455, 0   , 0          , 0  , 0.066666667, 0.069767442, 0          , 0   , 0, 1          , 0], #Poisoning
-                                  [0          , 0          , 0   , 0          , 0          , 0, 0.117647059, 0          , 0          , 0    , 0          , 0  , 0          , 0          , 0, 0          , 0          , 0          , 0          , 0          , 0   , 0          , 0  , 0          , 0          , 0          , 0.25, 0, 0          , 1],]) #Insomnia
+                                  [0          , 0          , 0   , 0          , 0          , 0, 0.117647059, 0          , 0          , 0    , 0          , 0  , 0          , 0          , 0, 0          , 0          , 0          , 0          , 0          , 0   , 0          , 0  , 0          , 0          , 0          , 0.25, 0, 0          , 1]]) #Insomnia
 
     # Train the neural network using the training set.
-    # Do it 60,000 times and make small adjustments each time.
-    neural_network.train(training_set_inputs, training_set_outputs, 600000)
+    # Do it 50,000 times and make small adjustments each time.
+    neural_network.train(training_set_inputs, training_set_outputs, 50000)
 
     print ("Stage 2) New synaptic weights after training: ")
     neural_network.print_weights()
 
     option = 0
-    info = []
     info = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -469,5 +480,9 @@ if __name__ == "__main__":
             else:
                 info[int(option) - 1] = 1
 
+    print(info)
     hidden_state, output = neural_network.think(info)
     print (output)
+
+    #print("Efficiency")
+    #print(abs((output - training_set_outputs) / training_set_outputs)*100)
